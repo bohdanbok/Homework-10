@@ -1,7 +1,45 @@
 import sys 
+from collections import UserDict
 
-contacts ={}
 STOP_WORDS = ['exit', 'good bye', 'close']
+
+
+class Field():
+    def __init__(self, value=None):
+        self.value = value
+    
+class Name(Field):
+    def __init__(self, value):
+        self.value = value
+            
+class Phone(Field):
+    def __init__(self, value):
+        self.value = value
+
+class Record:
+    
+    def __init__(self, name):
+        self.name = Name(name)
+        self.phones = []
+        
+    def add_phone(self, phone):
+        self.phones.append(Phone(phone))
+        
+    def remove_phone(self, phone):
+        self.phone = [p for p in self.phone if p.value != phone]
+        
+    def edit_phone(self, old_phone, new_phone):
+        for phone in self.phone:
+            if phone.value == old_phone:
+                phone.value = new_phone
+                break
+
+class AddressBook(UserDict):
+    def add_record(self, record):
+        self.data[record.name.value] = record
+
+contacts = AddressBook()
+
 
 def input_error(func):
     def inner(*args, **kwargs):
@@ -27,9 +65,15 @@ def new_contact(user_input):
         raise ValueError
     name = parts[1]
     phone = parts[2]
+    
+    if name not in contacts:
+        record = Record(name)
+        record.add_phone(phone)
+        contacts.add_record(record)
+        
     if phone == '':
         raise ValueError
-    contacts[name] = phone
+    
     result = 'Contact was successfully created'
     return result
 
@@ -57,9 +101,9 @@ def show_contact(user_input):
     return contacts[name]
 
 def show_all():
-    return contacts
+        return contacts
 
-@input_error    
+    
 def process_input(user_input):
     listed_user_input = user_input.split(' ')
     command = listed_user_input[0].lower()
@@ -80,7 +124,7 @@ def run_bot():
         user_input = input("Write your request: ")
         if user_input not in STOP_WORDS:
             print(process_input(user_input))
-        if user_input in STOP_WORDS:
+        elif user_input in STOP_WORDS:
             print('Good bye!')
             return sys.exit()
         
